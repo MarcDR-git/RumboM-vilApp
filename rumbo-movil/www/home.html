@@ -1,0 +1,49 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Rumbo</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>Rumbo ✈️</h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header>
+  <section class="card row" style="min-height:180px;gap:16px;align-items:flex-start">
+    <span class="wave" aria-hidden="true">👋</span>
+    <div><h2>¡Hola de nuevo!</h2><p class="muted" style="margin-top:8px">Aquí empieza tu próxima aventura. Crea un viaje o retoma uno que ya tengas.</p></div>
+  </section>
+  <div class="notes-wrap"><svg class="notes" viewBox="0 0 230 180" role="img" aria-label="Libreta tomando notas">
+    <rect class="nb-page" x="42" y="12" width="150" height="150" rx="12"/><rect class="nb-cover" x="42" y="12" width="26" height="150" rx="12"/>
+    <circle class="nb-ring" cx="42" cy="34" r="5"/><circle class="nb-ring" cx="42" cy="60" r="5"/><circle class="nb-ring" cx="42" cy="86" r="5"/><circle class="nb-ring" cx="42" cy="112" r="5"/><circle class="nb-ring" cx="42" cy="138" r="5"/>
+    <path class="nb-line" pathLength="100" d="M80 48H178"/><path class="nb-line" pathLength="100" d="M80 76H178"/><path class="nb-line" pathLength="100" d="M80 104H178"/><path class="nb-line" pathLength="100" d="M80 132H140"/>
+    <g class="pen"><g class="wig"><g transform="rotate(35)"><polygon points="0,0 -4,-10 4,-10" fill="#e8c99b"/><polygon points="0,0 -1.5,-4 1.5,-4" fill="#333"/>
+      <rect x="-4" y="-48" width="8" height="38" fill="#f2a541"/><rect x="-4" y="-52" width="8" height="4" fill="#b8b8b8"/><rect x="-4" y="-58" width="8" height="6" rx="2" fill="#e76f51"/></g></g></g>
+  </svg></div>
+  <div class="userbar" id="me"></div>
+  <nav class="grid">
+    <button class="tile" onclick="A.go('crear.html')"><span>🧭</span>Planificar viaje</button>
+    <button class="tile" onclick="A.go('almacen.html')"><span>🗂️</span>Almacén de planes</button>
+    <button class="tile" onclick="A.go('todolist.html')"><span>✅</span>To-Do list</button>
+    <button class="tile" onclick="sheet.classList.add('open')"><span>🔁</span>Importar / Exportar</button>
+    <button class="tile" onclick="A.go('compartir.html')"><span>📤</span>Compartir</button>
+    
+  </nav>
+</main>
+<div class="sheet" id="sheet" role="dialog" aria-label="Importar o exportar">
+  <h2>Importar / Exportar</h2>
+  <button class="btn wide" id="exp">Exportar mis viajes</button>
+  <button class="btn wide" onclick="imp.click()">Importar viajes</button>
+  <input type="file" id="imp" accept=".json" hidden>
+  <button class="btn ghost wide" onclick="sheet.classList.remove('open')">Cerrar</button>
+</div>
+<script>
+  let user;
+  A.requireUser().then(u => { user = u; if (!u) return;
+    me.innerHTML = A.avatar(u, 'sm') + `<b>${u.username.replace(/</g, '&lt;')}</b>`; });
+  exp.onclick = async () => {
+    const trips = await A.api('/api/trips/' + user._id), lists = await A.api('/api/lists');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({ trips, lists }, null, 2)], { type: 'application/json' }));
+    a.download = 'rumbo-viajes.json'; a.click();
+  };
+  imp.onchange = async e => {
+    try { const data = JSON.parse(await e.target.files[0].text());
+      const r = await A.api('/api/trips/import/' + user._id, 'POST', data);
+      A.toast(r.imported + ' viaje(s) importado(s)'); sheet.classList.remove('open');
+    } catch { A.toast('Archivo no válido'); }
+  };
+</script></body></html>

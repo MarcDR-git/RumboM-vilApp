@@ -1,0 +1,35 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>To-Do list</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script><script src="js/trip.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>To-Do list</h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header>
+  <button class="btn wide" id="new">＋ Nuevo tema</button>
+  <section class="card stack" id="form">
+    <label>Título del tema<input id="t" placeholder="Ej.: Souvenirs para traer" maxlength="80"></label>
+    <div class="err" id="err" role="alert"></div>
+    <button class="btn wide" id="add">Crear tema</button><button class="btn ghost wide" id="cancel">Cancelar</button>
+  </section>
+  <section class="stack" id="list"></section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('home.html')">Volver atrás</button></footer>
+</main>
+<script>
+  const $ = id => document.getElementById(id), e = T.esc; let lists = [], edit = null, open = false;
+  const view = () => { const empty = !lists.length; $('form').hidden = !(open || empty); $('new').hidden = open || empty; $('cancel').hidden = empty && !edit; $('add').textContent = edit ? 'Guardar cambios' : 'Crear tema'; };
+  const render = () => {
+    $('list').innerHTML = lists.map(l => { const n = l.items.length, d = l.items.filter(i => i.done).length;
+      return `<div class="card item" data-id="${l._id}" style="cursor:pointer;align-items:center"><div class="grow"><b>${e(l.title)}</b>
+        <span class="muted">${n ? `${d} de ${n} hechos` : 'Sin elementos'}</span><div class="bar" style="width:100%;margin-top:6px"><i style="width:${n ? d / n * 100 : 0}%;animation:none"></i></div></div>
+        <div><button class="del" data-e="${l._id}" aria-label="Editar">✏️</button><button class="del" data-x="${l._id}" aria-label="Eliminar">🗑️</button></div></div>`; }).join('');
+    view(); };
+  const load = async () => { lists = await A.api('/api/lists'); render(); };
+  A.requireUser().then(u => { if (u) load(); });
+  $('new').onclick = () => { edit = null; open = true; $('t').value = ''; view(); $('t').focus(); };
+  $('cancel').onclick = () => { edit = null; open = false; $('t').value = ''; $('err').textContent = ''; view(); };
+  $('add').onclick = async () => { $('err').textContent = '';
+    try { if (edit) await A.api('/api/list/' + edit, 'PUT', { title: $('t').value }); else await A.api('/api/lists', 'POST', { title: $('t').value });
+      edit = null; open = false; $('t').value = ''; await load(); } catch (x) { $('err').textContent = x.message; } };
+  $('list').onclick = async ev => { const b = ev.target.closest('button');
+    if (b && b.dataset.e) { const l = lists.find(x => x._id === b.dataset.e); edit = l._id; open = true; $('t').value = l.title; view(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (b && b.dataset.x) { if (!confirm('¿Borrar este tema y todos sus elementos?')) { document.querySelectorAll('.removing').forEach(r => r.classList.remove('removing')); return; }
+      await A.api('/api/list/' + b.dataset.x, 'DELETE'); load(); return; }
+    const c = ev.target.closest('[data-id]'); if (c && !b) A.go('todo.html?id=' + c.dataset.id); };
+</script></body></html>

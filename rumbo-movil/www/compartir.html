@@ -1,0 +1,21 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Compartir</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script><script src="js/trip.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>Compartir</h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header>
+  <p class="muted">1. Elige el plan de viaje</p>
+  <section class="stack" id="trips"></section>
+  <section class="card stack"><p class="muted">Crea un archivo del plan y envíalo por WhatsApp, correo o la app que prefieras. Quien lo reciba lo carga desde Importar / Exportar.</p>
+    <button class="btn wide" id="dl">Compartir archivo</button><p class="muted" id="st" role="status"></p></section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('home.html')">Volver atrás</button></footer>
+</main>
+<script>
+  const $ = id => document.getElementById(id); let sel = '';
+  const status = m => { $('st').textContent = m; A.toast(m); };
+  A.requireUser().then(async u => { if (!u) return; const trips = await A.api('/api/trips/' + u._id);
+    $('trips').innerHTML = trips.length ? trips.map(t => `<div class="card item" data-id="${t._id}" style="cursor:pointer;align-items:center"><b>${T.esc(t.title)}</b></div>`).join('') : '<p class="muted">Aún no tienes planes que compartir.</p>';
+    if (trips.length === 1) pick(trips[0]._id); });
+  function pick(id) { sel = id; document.querySelectorAll('#trips .card').forEach(c => c.classList.toggle('sel', c.dataset.id === id)); }
+  $('trips').onclick = e => { const c = e.target.closest('[data-id]'); if (c) pick(c.dataset.id); };
+  $('dl').onclick = async () => { if (!sel) return status('Elige primero un plan en el paso 1.'); const t = await A.api('/api/trip/' + sel);
+    await A.saveFile(t.title.replace(/[^\w-]+/g, '_') + '.json', JSON.stringify({ trips: [t] }, null, 2), 'application/json'); };
+</script></body></html>

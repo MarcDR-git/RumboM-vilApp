@@ -1,0 +1,22 @@
+{
+  "name": "rumbo-movil",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rumbo - organizador de viajes (app móvil, datos en el teléfono)",
+  "scripts": {
+    "web": "npx --yes serve www -l 8080",
+    "android:add": "cap add android",
+    "icons": "capacitor-assets generate --android",
+    "sync": "cap sync android",
+    "open": "cap open android",
+    "apk": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/browser": "^6.0.3",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/filesystem": "^6.0.1",
+    "@capacitor/share": "^6.0.2"
+  },
+  "devDependencies": { "@capacitor/assets": "^3.0.5", "@capacitor/cli": "^6.1.2" }
+}

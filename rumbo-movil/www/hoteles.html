@@ -1,0 +1,18 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>hoteles</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script><script src="js/trip.js"></script><script src="js/lists.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1 id="h"></h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header>
+  <section class="card stack" id="form"></section>
+  <section class="stack" id="list"></section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('planificar.html?id='+T.id())">Volver atrás</button></footer>
+</main>
+<script>
+Lists.init({ key: 'hotels', title: 'Hoteles', img: true, minors: true, icon: '🏨', empty: 'Aún no has añadido hoteles. Busca uno en Booking y anota los datos aquí.',
+  fields: [{ k: 'name', label: 'Nombre del hotel' },
+    { k: 'checkin', label: 'Entrada', type: 'date', def: (t) => t.start }, { k: 'checkout', label: 'Salida', type: 'date', def: (t) => t.end },
+    { k: 'rooms', label: 'Habitaciones', type: 'number', def: () => 1 }, { k: 'people', label: 'Personas', type: 'number', def: () => 2 },
+    { k: 'price', label: 'Precio total (€)', type: 'number' }, { k: 'location', label: 'Ubicación (dirección o ciudad)' }],
+  extra: { label: 'Buscar en Booking', url: (v, t) => 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(v.name || t.country) +
+    '&checkin=' + v.checkin + '&checkout=' + v.checkout + '&group_adults=' + v.people + '&no_rooms=' + v.rooms },
+  line: (i) => `<span class="muted">${T.esc(i.checkin)} → ${T.esc(i.checkout)} · ${T.esc(i.rooms)} hab. · ${T.esc(i.people)} pers.</span><span>${i.price ? T.esc(i.price) + ' €' : ''}</span>${i.minors?.length ? `<span class="muted">👶 Menores: ${i.minors.map(T.esc).join(', ')} años</span>` : ''}` });
+</script></body></html>

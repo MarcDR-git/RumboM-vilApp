@@ -1,0 +1,17 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Nuevo viaje</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>Nuevo viaje</h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header><h2>¿Cómo se llama tu viaje?</h2>
+  <section class="card stack">
+    <label>Título del viaje<input type="text" id="t" placeholder="Ej.: Verano en Japón"></label>
+    <div class="err" id="e" role="alert"></div>
+    <button class="btn wide" id="ok">Crear viaje</button>
+  </section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('home.html')">Volver atrás</button></footer>
+</main>
+<script>
+  A.requireUser();
+  ok.onclick = async () => { try {
+    const t = await A.api('/api/trips', 'POST', { owner: A.uid(), title: document.getElementById('t').value });
+    A.go('planificar.html?id=' + t._id); } catch (e) { document.getElementById('e').textContent = e.message; } };
+</script></body></html>

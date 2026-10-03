@@ -1,0 +1,21 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Recuperar contraseña</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>Recuperar contraseña</h1></header>
+  <p class="muted">Usa el código de recuperación que te dimos al registrarte (o el que generaste en Ajustes).</p>
+  <section class="card stack">
+    <label>Nombre de usuario<input id="u" autocomplete="username"></label>
+    <label>Código de recuperación<input id="c" placeholder="XXXXX-XXXXX" autocomplete="off"></label>
+    <label>Nueva contraseña<input type="password" id="p" autocomplete="new-password"></label>
+    <div class="err" id="e" role="alert"></div><button class="btn wide" id="go">Restablecer contraseña</button>
+  </section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('inicio.html')">Volver atrás</button></footer>
+</main>
+<div class="sheet" id="ok" role="dialog"><h2>Contraseña cambiada</h2>
+  <p class="muted">Este es tu nuevo código de recuperación. Guárdalo; el anterior ya no sirve.</p>
+  <h1 id="code" style="letter-spacing:.08em;user-select:all"></h1><button class="btn wide" onclick="A.go('inicio.html')">Lo he guardado</button></div>
+<script>
+  const $ = id => document.getElementById(id);
+  $('go').onclick = async () => { try { const r = await A.api('/api/reset', 'POST', { username: $('u').value, code: $('c').value, password: $('p').value });
+    $('code').textContent = r.recoveryCode; $('ok').classList.add('open'); } catch (x) { $('e').textContent = x.message; } };
+</script></body></html>

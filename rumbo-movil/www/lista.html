@@ -1,0 +1,31 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Qué llevar</title>
+<link rel="stylesheet" href="css/style.css"><script src="js/app.js"></script><script src="js/trip.js"></script></head>
+<body><main class="screen">
+  <header class="top"><h1>Qué llevar</h1><button class="gear" onclick="A.go('ajustes.html')" aria-label="Ajustes">⚙️</button></header>
+  <p class="muted" id="prog"></p>
+  <div class="row"><input id="i" placeholder="Añadir cosa a la lista"><button class="btn" id="add">＋</button></div>
+  <p class="muted">Plantillas</p><nav class="legtabs" id="tpl"></nav>
+  <section class="stack" id="list"></section>
+  <footer class="foot"><button class="btn ghost wide" onclick="A.go('planificar.html?id='+T.id())">Volver atrás</button></footer>
+</main>
+<script>
+  const $ = id => document.getElementById(id), e = T.esc; let t;
+  const TPL = { 'Básica': ['Pasaporte / DNI', 'Billetes y reservas', 'Cargador y adaptador', 'Medicinas', 'Neceser', 'Seguro de viaje', 'Dinero y tarjetas'],
+    'Playa': ['Bañador', 'Toalla de playa', 'Crema solar', 'Gafas de sol', 'Gorra', 'Chanclas', 'After sun'],
+    'Montaña': ['Botas de senderismo', 'Mochila', 'Chubasquero', 'Forro polar', 'Botella de agua', 'Botiquín', 'Linterna', 'Mapa o GPS'],
+    'Ciudad': ['Calzado cómodo', 'Powerbank', 'Paraguas', 'Mochila pequeña', 'Tarjeta de transporte', 'Guía o mapa offline'],
+    'Invierno': ['Abrigo', 'Guantes y gorro', 'Bufanda', 'Ropa térmica', 'Calcetines gruesos', 'Crema hidratante'] };
+  $('tpl').innerHTML = Object.keys(TPL).map(k => `<button class="chip" data-k="${k}">＋ ${k}</button>`).join('');
+  const render = () => { const d = t.packing.filter(x => x.done).length;
+    $('prog').textContent = t.packing.length ? `${d} de ${t.packing.length} preparadas` : 'Tu lista está vacía.';
+    $('list').innerHTML = t.packing.map((x, i) => `<div class="card item" style="align-items:center;padding:12px 16px"><input type="checkbox" style="width:22px;height:22px" data-c="${i}" ${x.done ? 'checked' : ''} aria-label="Hecho">
+      <span class="grow" style="${x.done ? 'text-decoration:line-through;opacity:.5' : ''}">${e(x.text)}</span><button class="del" data-x="${i}" aria-label="Eliminar">🗑️</button></div>`).join(''); };
+  const save = async () => { await T.save(t); render(); };
+  A.requireUser().then(async u => { if (!u) return; t = await T.get(); t.packing = t.packing || []; render(); });
+  $('add').onclick = () => { const v = $('i').value.trim(); if (!v) return; t.packing.push({ text: v, done: false }); $('i').value = ''; save(); };
+  $('i').onkeydown = ev => { if (ev.key === 'Enter') $('add').click(); };
+  $('tpl').onclick = ev => { const b = ev.target.closest('[data-k]'); if (!b) return; const have = new Set(t.packing.map(x => x.text.toLowerCase()));
+    TPL[b.dataset.k].filter(x => !have.has(x.toLowerCase())).forEach(text => t.packing.push({ text, done: false })); save(); };
+  $('list').onclick = ev => { const c = ev.target.dataset.c, x = ev.target.closest('[data-x]');
+    if (c !== undefined) { t.packing[+c].done = ev.target.checked; save(); } else if (x) { t.packing.splice(+x.dataset.x, 1); save(); } };
+</script></body></html>
